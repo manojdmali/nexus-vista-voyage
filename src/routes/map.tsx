@@ -33,6 +33,12 @@ function MapPage() {
           that part of the ecosystem.
         </p>
       </header>
+      <div className="flex flex-wrap gap-x-6 gap-y-2 border-y border-border py-3 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+        <span><strong className="text-foreground">Parent</strong> · group</span>
+        <span><strong className="text-foreground">Companies</strong> · divisions</span>
+        <span><strong className="text-foreground">Categories</strong> · domains</span>
+        <span><strong className="text-foreground">Products</strong> · clickable nodes</span>
+      </div>
       <EcosystemMap />
     </div>
   );

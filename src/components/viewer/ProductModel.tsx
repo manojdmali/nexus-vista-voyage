@@ -35,13 +35,24 @@ function useMaterials(accent: string, wireframe: boolean) {
       transparent: true,
       opacity: 0.35,
     });
-    return { body, glow, frame };
+    const copper = new THREE.MeshStandardMaterial({
+      color: "#b87333",
+      emissive: new THREE.Color("#5c2e12"),
+      emissiveIntensity: 0.35,
+      metalness: 0.92,
+      roughness: 0.2,
+      transparent: !wireframe,
+      opacity: wireframe ? 0.3 : 0.48,
+      wireframe,
+      depthWrite: false,
+    });
+    return { body, glow, frame, copper };
   }, [accent, wireframe]);
 }
 
 export function ProductModel({ shape, accent, wireframe, autoRotate, speed }: Props) {
   const group = useRef<THREE.Group>(null);
-  const { body, glow, frame } = useMaterials(accent, wireframe);
+  const { body, glow, frame, copper } = useMaterials(accent, wireframe);
 
   useFrame((_, delta) => {
     if (group.current && autoRotate) group.current.rotation.y += delta * speed;
@@ -167,6 +178,29 @@ export function ProductModel({ shape, accent, wireframe, autoRotate, speed }: Pr
           </mesh>
           <mesh material={frame} scale={1.2}>
             <octahedronGeometry args={[1.6, 0]} />
+          </mesh>
+        </>
+      )}
+
+      {shape === "wire" && (
+        <>
+          <mesh material={copper} rotation={[0, 0, 0]}>
+            <cylinderGeometry args={[1.45, 1.45, 3.7, 64, 1, true]} />
+          </mesh>
+          <mesh material={glow}>
+            <cylinderGeometry args={[0.24, 0.24, 3.45, 32]} />
+          </mesh>
+          <mesh material={frame}>
+            <cylinderGeometry args={[1.52, 1.52, 3.82, 64, 1, true]} />
+          </mesh>
+          <mesh material={copper} position={[0, 1.86, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <torusGeometry args={[1.45, 0.08, 12, 64]} />
+          </mesh>
+          <mesh material={copper} position={[0, -1.86, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <torusGeometry args={[1.45, 0.08, 12, 64]} />
+          </mesh>
+          <mesh material={glow} position={[0, 0, 0.28]}>
+            <torusGeometry args={[0.24, 0.045, 12, 32]} />
           </mesh>
         </>
       )}

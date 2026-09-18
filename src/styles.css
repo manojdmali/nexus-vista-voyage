@@ -85,6 +85,41 @@
   --grid: oklch(0.87 0.155 196 / 7%);
 }
 
+html.light {
+  color-scheme: light;
+
+  --background: oklch(0.97 0.012 210);
+  --surface: oklch(0.99 0.008 210);
+  --surface-2: oklch(0.94 0.018 210);
+  --foreground: oklch(0.19 0.035 235);
+
+  --card: oklch(0.99 0.008 210);
+  --card-foreground: oklch(0.19 0.035 235);
+  --popover: oklch(0.99 0.008 210);
+  --popover-foreground: oklch(0.19 0.035 235);
+
+  --primary: oklch(0.55 0.15 205);
+  --primary-foreground: oklch(0.99 0.008 210);
+  --secondary: oklch(0.91 0.025 210);
+  --secondary-foreground: oklch(0.22 0.04 235);
+  --muted: oklch(0.92 0.02 210);
+  --muted-foreground: oklch(0.42 0.04 235);
+  --accent: oklch(0.57 0.17 300);
+  --accent-foreground: oklch(0.99 0.008 210);
+
+  --violet: oklch(0.57 0.17 300);
+  --azure: oklch(0.55 0.15 245);
+  --emerald: oklch(0.52 0.14 165);
+
+  --destructive: oklch(0.58 0.2 25);
+  --destructive-foreground: oklch(0.99 0.008 210);
+  --border: oklch(0.38 0.08 220 / 18%);
+  --border-strong: oklch(0.38 0.08 220 / 36%);
+  --input: oklch(0.38 0.08 220 / 22%);
+  --ring: oklch(0.55 0.15 205 / 60%);
+  --grid: oklch(0.38 0.08 220 / 10%);
+}
+
 @layer base {
   * {
     border-color: var(--color-border);
@@ -96,10 +131,32 @@
 
   body {
     background-color: var(--color-background);
+    background-image: radial-gradient(circle at 12% 8%, color-mix(in oklab, var(--primary) 10%, transparent), transparent 32rem),
+      radial-gradient(circle at 88% 18%, color-mix(in oklab, var(--accent) 8%, transparent), transparent 28rem),
+      linear-gradient(color-mix(in oklab, var(--primary) 4%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in oklab, var(--primary) 4%, transparent) 1px, transparent 1px);
+    background-size: auto, auto, 64px 64px, 64px 64px;
+    background-position: center, center, center, center;
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
+  }
+
+  body::before {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    content: "";
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      112deg,
+      transparent 0,
+      transparent 11rem,
+      color-mix(in oklab, var(--primary) 3%, transparent) 11.05rem,
+      transparent 11.1rem
+    );
+    opacity: 0.65;
   }
 
   h1,
@@ -119,6 +176,36 @@
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
   }
+}
+
+.viewer-stage {
+  background: radial-gradient(circle at 50% 42%, color-mix(in oklab, var(--primary) 8%, transparent), transparent 48%),
+    linear-gradient(135deg, color-mix(in oklab, var(--surface-2) 78%, transparent), var(--background));
+}
+
+.shell-nav {
+  position: relative;
+  isolation: isolate;
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%);
+}
+
+.shell-nav::after {
+  position: absolute;
+  inset-inline: 14px;
+  top: 0;
+  height: 1px;
+  content: "";
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.breadcrumb-bar {
+  isolation: isolate;
+}
+
+.breadcrumb-menu {
+  animation: ft-rise 0.18s ease-out both;
 }
 
 @utility glass {
@@ -183,8 +270,48 @@
   }
 }
 
+@keyframes ft-tree-node-in {
+  from {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes ft-tree-edge-flow {
+  from {
+    stroke-dashoffset: 36;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes ft-tree-edge-drift {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -40;
+  }
+}
+
 .ft-rise {
   animation: ft-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.ft-tree-node {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ft-tree-node-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.ft-tree-edge {
+  stroke-dasharray: 8 12;
+  animation: ft-tree-edge-flow 1.2s ease-out both, ft-tree-edge-drift 9s linear 1.2s infinite;
 }
 
 .ft-pulse-ring {
@@ -198,6 +325,11 @@
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
+  }
+
+  .ft-tree-node,
+  .ft-tree-edge {
+    animation: none !important;
   }
 }
 

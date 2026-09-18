@@ -64,7 +64,7 @@ function ProductPage() {
     <div className="space-y-8">
       <Breadcrumbs companyId={company.id} categoryId={category.id} productId={product.id} />
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,0.78fr)_minmax(0,1.72fr)]">
         <div className="space-y-6">
           <header>
             <p className="eyebrow" style={{ color: company.accent }}>
@@ -111,7 +111,7 @@ function ProductPage() {
           </div>
         </div>
 
-        <div className="xl:sticky xl:top-28 xl:h-[calc(100vh-9rem)]">
+        <div className="xl:sticky xl:top-28 xl:h-[calc(100vh-9rem)] xl:min-h-[680px]">
           <ProductViewer config={product.model3D} productName={product.name} />
         </div>
       </div>

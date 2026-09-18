@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Environment, Html, OrbitControls } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
@@ -57,7 +57,23 @@ export default function Scene({
   resetSignal,
 }: Props) {
   const controls = useRef<OrbitControlsImpl | null>(null);
-  const position = config.cameraAngles[preset].position;
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const position = config.cameraAngles[preset].position.map((value) => value * 0.82) as [
+    number,
+    number,
+    number,
+  ];
+
+  useEffect(() => {
+    const onThemeChange = (event: Event) => {
+      const nextTheme = (event as CustomEvent<"dark" | "light">).detail;
+      setTheme(nextTheme);
+    };
+    window.addEventListener("futuretech-theme-change", onThemeChange);
+    return () => window.removeEventListener("futuretech-theme-change", onThemeChange);
+  }, []);
+
+  const lightMode = theme === "light";
 
   return (
     <Canvas
@@ -66,11 +82,11 @@ export default function Scene({
       gl={{ antialias: true, alpha: true }}
       style={{ touchAction: "none" }}
     >
-      <color attach="background" args={["#070b14"]} />
-      <fog attach="fog" args={["#070b14", 8, 22]} />
+      <color attach="background" args={[lightMode ? "#edf5f6" : "#070b14"]} />
+      <fog attach="fog" args={[lightMode ? "#edf5f6" : "#070b14", 8, 22]} />
       <ambientLight intensity={0.45} />
       <directionalLight position={[4, 6, 5]} intensity={1.4} color={config.accent} />
-      <pointLight position={[-5, -3, -4]} intensity={2.2} color="#9D6BFF" />
+      <pointLight position={[-5, -3, -4]} intensity={2.2} color={lightMode ? "#5c4bb7" : "#9D6BFF"} />
       <Environment preset="city" />
 
       <ProductModel
@@ -104,7 +120,10 @@ export default function Scene({
         </group>
       ))}
 
-      <gridHelper args={[16, 16, "#123049", "#0d1c2c"]} position={[0, -2.4, 0]} />
+      <gridHelper
+        args={lightMode ? [16, 16, "#6d9aa6", "#c5d9dc"] : [16, 16, "#123049", "#0d1c2c"]}
+        position={[0, -2.4, 0]}
+      />
 
       <OrbitControls
         ref={controls}

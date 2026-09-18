@@ -29,6 +29,33 @@ const slugify = (s: string) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "") || "item";
 
+function includeNewProducts(saved: ParentCompany) {
+  const baseProducts = baseEcosystem.companies.flatMap((company) =>
+    company.categories.flatMap((category) => category.products),
+  );
+  const savedProductIds = new Set(
+    saved.companies.flatMap((company) => company.categories.flatMap((category) => category.products.map((product) => product.id))),
+  );
+  const missingProducts = baseProducts.filter((product) => !savedProductIds.has(product.id));
+  if (missingProducts.length === 0) return saved;
+
+  return {
+    ...saved,
+    companies: saved.companies.map((company) => ({
+      ...company,
+      categories: company.categories.map((category) => ({
+        ...category,
+        products: [
+          ...category.products,
+          ...missingProducts.filter(
+            (product) => product.companyId === company.id && product.categoryId === category.id,
+          ),
+        ],
+      })),
+    })),
+  };
+}
+
 export function EcosystemProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<ParentCompany>(baseEcosystem);
   const [isCustomised, setCustomised] = useState(false);
@@ -37,7 +64,7 @@ export function EcosystemProvider({ children }: { children: ReactNode }) {
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
       if (raw) {
-        setData(JSON.parse(raw) as ParentCompany);
+        setData(includeNewProducts(JSON.parse(raw) as ParentCompany));
         setCustomised(true);
       }
     } catch {

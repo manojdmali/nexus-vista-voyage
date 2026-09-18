@@ -10,7 +10,7 @@ export type Hotspot = {
   position: [number, number, number];
 };
 
-export type ModelShape = "core" | "lattice" | "shield" | "orbital" | "stack" | "prism";
+export type ModelShape = "core" | "lattice" | "shield" | "orbital" | "stack" | "prism" | "wire";
 
 export type Model3DConfig = {
   shape: ModelShape;

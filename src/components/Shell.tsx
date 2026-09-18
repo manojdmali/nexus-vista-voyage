@@ -1,18 +1,38 @@
 import { useEffect, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Expand, Hexagon, Monitor, PlayCircle, Search, Settings2, StopCircle } from "lucide-react";
+import {
+  Expand,
+  Hexagon,
+  Map,
+  Monitor,
+  Moon,
+  Network,
+  PlayCircle,
+  Search,
+  Settings2,
+  StopCircle,
+  Sun,
+} from "lucide-react";
 import { ParticleField } from "./ParticleField";
 import { SearchModal } from "./SearchModal";
 import { useKiosk } from "@/lib/kiosk";
 import { useEcosystem } from "@/lib/ecosystem-store";
 
-function NavLink({ to, label }: { to: string; label: string }) {
+function NavLink({ to, label, icon: Icon }: { to: string; label: string; icon: React.ElementType }) {
+  const navItem =
+    "group relative flex items-center gap-2 rounded-sm border border-transparent px-3 py-2 text-xs text-muted-foreground transition-all hover:border-border hover:bg-surface-2 hover:text-foreground";
   return (
     <Link
       to={to as never}
-      className="rounded-sm px-3 py-2 text-xs text-muted-foreground transition-colors hover:text-primary"
-      activeProps={{ className: "text-primary" }}
+      activeOptions={{ exact: true }}
+      className={navItem}
+      activeProps={{
+        className: `${navItem} border-primary/35 bg-primary/10 text-primary before:absolute before:bottom-1 before:left-0 before:top-1 before:w-0.5 before:bg-primary before:shadow-[0_0_12px_var(--primary)]`,
+      }}
     >
+      <span className="grid h-5 w-5 place-items-center border border-current/30 bg-background/30 transition-all group-hover:border-current/60">
+        <Icon className="h-3.5 w-3.5 transition-transform group-hover:scale-110" />
+      </span>
       {label}
     </Link>
   );
@@ -20,9 +40,21 @@ function NavLink({ to, label }: { to: string; label: string }) {
 
 export function Shell({ children }: { children: React.ReactNode }) {
   const [searchOpen, setSearchOpen] = useState(false);
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
   const { data } = useEcosystem();
   const kioskCtx = useKiosk();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  useEffect(() => {
+    const savedTheme = window.localStorage.getItem("futuretech.theme");
+    if (savedTheme === "light" || savedTheme === "dark") setTheme(savedTheme);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("light", theme === "light");
+    window.localStorage.setItem("futuretech.theme", theme);
+    window.dispatchEvent(new CustomEvent("futuretech-theme-change", { detail: theme }));
+  }, [theme]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -36,23 +68,31 @@ export function Shell({ children }: { children: React.ReactNode }) {
   }, []);
 
   const iconBtn =
-    "flex h-11 w-11 items-center justify-center rounded-sm border border-border text-muted-foreground transition-colors hover:border-border-strong hover:text-primary";
+    "flex h-11 items-center justify-center gap-2 rounded-sm border border-border px-3 text-muted-foreground transition-colors hover:border-border-strong hover:text-primary";
 
   return (
     <div className="relative min-h-screen">
       <ParticleField />
 
-      <header className="sticky top-0 z-40 border-b border-border bg-background/70 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-[1800px] items-center gap-4 px-5 py-3 2xl:px-10">
-          <Link to="/" className="flex items-center gap-3">
-            <Hexagon className="h-6 w-6 text-primary" strokeWidth={1.4} />
-            <span className="font-display text-sm font-semibold tracking-tight">{data.name}</span>
+      <header className="shell-header sticky top-0 z-40 border-b border-border bg-background/82 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-[1800px] flex-wrap items-center gap-3 px-5 py-3 2xl:px-10">
+          <Link to="/" className="group flex min-w-0 items-center gap-3 rounded-sm pr-3">
+            <span className="grid h-10 w-10 shrink-0 place-items-center border border-primary/40 bg-primary/10">
+              <Hexagon className="h-6 w-6 text-primary transition-transform group-hover:rotate-12" strokeWidth={1.4} />
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate font-display text-sm font-semibold tracking-tight">{data.name}</span>
+              <span className="hidden font-mono text-[9px] uppercase tracking-[0.2em] text-muted-foreground xl:block">Digital ecosystem</span>
+            </span>
           </Link>
 
-          <nav className="ml-4 hidden items-center gap-1 md:flex">
-            <NavLink to="/ecosystem" label="Ecosystem" />
-            <NavLink to="/map" label="Map" />
-            <NavLink to="/admin" label="Admin" />
+          <nav
+            aria-label="Primary navigation"
+            className="shell-nav order-3 flex w-full items-center gap-1 overflow-x-auto border border-border bg-surface/45 p-1 pt-1 md:order-none md:ml-2 md:w-auto"
+          >
+            <NavLink to="/ecosystem" label="Ecosystem" icon={Network} />
+            <NavLink to="/map" label="Map" icon={Map} />
+            <NavLink to="/admin" label="Admin" icon={Settings2} />
           </nav>
 
           <div className="ml-auto flex items-center gap-2">
@@ -69,9 +109,19 @@ export function Shell({ children }: { children: React.ReactNode }) {
             </button>
             <button
               type="button"
+              onClick={() => setTheme((value) => (value === "dark" ? "light" : "dark"))}
+              className={`${iconBtn} w-11 xl:w-auto`}
+              aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
+              title={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
+            >
+              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              <span className="hidden text-[11px] xl:inline">{theme === "dark" ? "Light" : "Dark"}</span>
+            </button>
+            <button
+              type="button"
               onClick={kioskCtx.demo ? kioskCtx.stopDemo : kioskCtx.startDemo}
               aria-pressed={kioskCtx.demo}
-              className={`${iconBtn} ${kioskCtx.demo ? "border-primary text-primary" : ""}`}
+              className={`${iconBtn} w-11 xl:w-auto ${kioskCtx.demo ? "border-primary text-primary" : ""}`}
               aria-label={kioskCtx.demo ? "Stop auto-demo tour" : "Start auto-demo tour"}
               title="Auto-demo tour"
             >
@@ -80,34 +130,37 @@ export function Shell({ children }: { children: React.ReactNode }) {
               ) : (
                 <PlayCircle className="h-4 w-4" />
               )}
+              <span className="hidden text-[11px] xl:inline">{kioskCtx.demo ? "Stop" : "Play"}</span>
             </button>
             <button
               type="button"
               onClick={() => kioskCtx.setKiosk(!kioskCtx.kiosk)}
               aria-pressed={kioskCtx.kiosk}
-              className={`${iconBtn} ${kioskCtx.kiosk ? "border-primary text-primary" : ""}`}
+              className={`${iconBtn} w-11 xl:w-auto ${kioskCtx.kiosk ? "border-primary text-primary" : ""}`}
               aria-label="Toggle kiosk mode"
               title="Kiosk / presentation mode"
             >
               <Monitor className="h-4 w-4" />
+              <span className="hidden text-[11px] xl:inline">Kiosk</span>
             </button>
             <button
               type="button"
               onClick={kioskCtx.toggleFullscreen}
-              className={iconBtn}
+              className={`${iconBtn} w-11 xl:w-auto`}
               aria-label="Toggle fullscreen"
               title="Fullscreen"
             >
               <Expand className="h-4 w-4" />
+              <span className="hidden text-[11px] xl:inline">Full screen</span>
             </button>
-            <Link to="/admin" className={`${iconBtn} md:hidden`} aria-label="Admin">
+            <Link to="/admin" className={`${iconBtn} w-11 md:hidden`} aria-label="Admin">
               <Settings2 className="h-4 w-4" />
             </Link>
           </div>
         </div>
         {kioskCtx.kiosk && (
-          <div className="border-t border-border bg-primary/10 px-5 py-1 text-center font-mono text-[10px] uppercase tracking-[0.3em] text-primary">
-            Kiosk mode · auto reset after {Math.round(kioskCtx.config.resetAfterMs / 1000)}s idle
+          <div className="border-t border-primary/20 bg-primary/10 px-5 py-2 text-center font-mono text-[10px] uppercase tracking-[0.24em] text-primary">
+            Presentation mode · auto reset after {Math.round(kioskCtx.config.resetAfterMs / 1000)}s idle
           </div>
         )}
       </header>

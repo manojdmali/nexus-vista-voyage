@@ -103,7 +103,7 @@ export function ProductViewer({
         </div>
       </div>
 
-      <div className="relative min-h-[420px] flex-1">
+      <div className="viewer-stage relative min-h-[560px] flex-1">
         {!mounted && (
           <div className="absolute inset-0 grid place-items-center text-sm text-muted-foreground">
             <span className="eyebrow animate-pulse text-primary">Initialising viewer…</span>

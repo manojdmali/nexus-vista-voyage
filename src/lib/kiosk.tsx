@@ -48,6 +48,7 @@ export function KioskProvider({ children }: { children: ReactNode }) {
 
   const stopDemo = useCallback(() => setDemo(false), []);
   const startDemo = useCallback(() => {
+    lastActivity.current = Date.now();
     setAttractor(false);
     setDemo(true);
   }, []);
@@ -106,6 +107,7 @@ export function KioskProvider({ children }: { children: ReactNode }) {
     let i = Math.max(0, tour.indexOf(pathname));
     const t = window.setInterval(() => {
       i = (i + 1) % tour.length;
+      window.scrollTo({ top: 0, behavior: "smooth" });
       navigate({ to: tour[i] as never });
     }, config.demoStepMs);
     return () => window.clearInterval(t);

@@ -12,7 +12,7 @@ type Crumb = {
 function CrumbItem({ crumb, last }: { crumb: Crumb; last: boolean }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="relative flex items-center gap-1">
+    <div className="relative z-10 flex items-center gap-1">
       <Link
         to={crumb.to as never}
         className={`max-w-[10rem] truncate rounded-sm px-2 py-1.5 text-xs transition-colors md:max-w-none ${
@@ -28,7 +28,7 @@ function CrumbItem({ crumb, last }: { crumb: Crumb; last: boolean }) {
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
             aria-label={`Jump to another ${crumb.label} sibling`}
-            className="rounded-sm p-1 text-muted-foreground transition-colors hover:text-primary"
+            className="rounded-sm border border-transparent p-1 text-muted-foreground transition-colors hover:border-border hover:bg-primary/10 hover:text-primary"
           >
             <ChevronDown className="h-3.5 w-3.5" />
           </button>
@@ -41,15 +41,19 @@ function CrumbItem({ crumb, last }: { crumb: Crumb; last: boolean }) {
                 className="fixed inset-0 z-30 cursor-default"
                 onClick={() => setOpen(false)}
               />
-              <div className="glass-strong absolute left-0 top-full z-40 mt-2 w-60 rounded-sm p-1">
+              <div className="breadcrumb-menu glass-strong absolute left-0 top-full z-[100] mt-2 w-64 rounded-sm p-1.5 shadow-[0_18px_50px_color-mix(in_oklab,var(--background)_65%,transparent)]">
+                <div className="border-b border-border px-3 py-2 font-mono text-[9px] uppercase tracking-[0.2em] text-primary">
+                  Select {crumb.label}
+                </div>
                 {crumb.siblings.map((s) => (
                   <Link
                     key={s.to}
                     to={s.to as never}
                     onClick={() => setOpen(false)}
-                    className="block truncate rounded-sm px-3 py-2.5 text-xs text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+                    className="group flex items-center justify-between gap-3 rounded-sm px-3 py-2.5 text-xs text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
                   >
-                    {s.label}
+                    <span className="truncate">{s.label}</span>
+                    <span className="h-1 w-1 shrink-0 rounded-full bg-primary/40 transition-colors group-hover:bg-primary" />
                   </Link>
                 ))}
               </div>
@@ -105,7 +109,7 @@ export function Breadcrumbs({
   return (
     <nav
       aria-label="Breadcrumb"
-      className="glass flex items-center gap-0.5 overflow-x-auto rounded-sm px-2 py-1"
+      className="breadcrumb-bar relative z-30 flex min-w-0 flex-wrap items-center gap-0.5 overflow-visible rounded-sm px-2 py-1.5"
     >
       <Link
         to="/"
